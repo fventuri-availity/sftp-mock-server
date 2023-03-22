@@ -62,6 +62,7 @@ export const handleSftpSession =
     sftp.on('OPENDIR', (reqId, path) => {
       ctx.debug(`Client tries to open the directory with path ${path}`);
       if (
+        path === '/' ||
         Object.keys(files).some((filePath) => filePath.startsWith(`${path}/`))
       ) {
         const handle = Buffer.from(path);
@@ -87,7 +88,7 @@ export const handleSftpSession =
         reqId,
         filePaths.map((filePath) => ({
           filename: filePath.split('/').slice(-1)[0],
-          longname: filePath.split('/').slice(-1)[0],
+          longname: `-rw-r--r--   1   ${files[filePath].uid}   ${files[filePath].gid}      ${files[filePath].size}  ${new Date(files[filePath].mtime).toLocaleString()} ${filePath.split('/').slice(-1)[0]}`,
           attrs: {
             atime: files[filePath].atime,
             mtime: files[filePath].mtime,
@@ -112,13 +113,13 @@ function handleSftpOpen(
       ctx.debug('create handle for new file');
       const handleId = randomUUID();
       const newFile: File = {
-        atime: new Date().getTime(),
-        mtime: new Date().getTime(),
+        atime: new Date().getTime() / 1000,
+        mtime: new Date().getTime() / 1000,
         mode: constants.S_IFREG,
         handleId,
         data: Buffer.from(''),
-        gid: 1,
-        uid: 1,
+        gid: 1000,
+        uid: 1000,
         path: filename,
         size: 0,
       };
