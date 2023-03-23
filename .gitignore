@@ -1,6 +1,8 @@
 .idea/*
 .nyc_output
-build
+build/*
+!build/main
+!build/module
 node_modules
 test
 src/**.js

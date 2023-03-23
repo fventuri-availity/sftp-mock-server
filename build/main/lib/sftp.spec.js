@@ -1,0 +1,83 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const ava_1 = __importDefault(require("ava"));
+const utils_1 = require("./utils");
+const port = Math.floor(Math.random() * 1000 + 9000);
+ava_1.default.serial('can upload and download file', async (t) => {
+    // GIVEN
+    const data = await (0, utils_1.setup)({
+        port: String(port),
+        users: {
+            test: { password: 'test' },
+        },
+    });
+    await data.client.connect({
+        host: '127.0.0.1',
+        port,
+        username: 'test',
+        password: 'test',
+    });
+    const content = 'My file content is awesome';
+    // WHEN
+    await data.client.put(Buffer.from(content), '/test/file.txt');
+    const read = await data.client.get('/test/file.txt');
+    // THEN
+    t.is(read.toString(), content);
+    await (0, utils_1.cleanup)(data);
+});
+ava_1.default.serial('can move and delete file', async (t) => {
+    // GIVEN
+    const data = await (0, utils_1.setup)({
+        port: String(port),
+        users: {
+            test: { password: 'test' },
+        },
+    });
+    await data.client.connect({
+        host: '127.0.0.1',
+        port,
+        username: 'test',
+        password: 'test',
+    });
+    const content = 'My file content is awesome';
+    // WHEN
+    await data.client.put(Buffer.from(content), '/test/file.txt');
+    const read = await data.client.get('/test/file.txt');
+    t.is(read.toString(), content);
+    await data.client.rename('/test/file.txt', '/test/fileRenamed.txt');
+    const stat = await data.client.stat('/test/fileRenamed.txt');
+    t.assert(stat.isFile);
+    const read2 = await data.client.get('/test/fileRenamed.txt');
+    t.is(read2.toString(), content);
+    await data.client.delete('/test/fileRenamed.txt');
+    t.throwsAsync(() => data.client.get('/test/fileRenamed.txt'));
+    // THEN
+    await (0, utils_1.cleanup)(data);
+});
+ava_1.default.serial('can read from directory', async (t) => {
+    // GIVEN
+    const data = await (0, utils_1.setup)({
+        port: String(port),
+        users: {
+            test: { password: 'test' },
+        },
+    });
+    await data.client.connect({
+        host: '127.0.0.1',
+        port,
+        username: 'test',
+        password: 'test',
+    });
+    const content = 'My file content is awesome';
+    // WHEN
+    await data.client.put(Buffer.from(content), '/test/file.txt');
+    const files = await data.client.list('/test');
+    // THEN
+    t.truthy(files.find((f) => f.name === 'file.txt'));
+    t.throwsAsync(() => data.client.list('/unknown'));
+    await (0, utils_1.cleanup)(data);
+});
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoic2Z0cC5zcGVjLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL2xpYi9zZnRwLnNwZWMudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQSw4Q0FBdUI7QUFDdkIsbUNBQXlDO0FBRXpDLE1BQU0sSUFBSSxHQUFHLElBQUksQ0FBQyxLQUFLLENBQUMsSUFBSSxDQUFDLE1BQU0sRUFBRSxHQUFHLElBQUksR0FBRyxJQUFJLENBQUMsQ0FBQztBQUVyRCxhQUFJLENBQUMsTUFBTSxDQUFDLDhCQUE4QixFQUFFLEtBQUssRUFBRSxDQUFDLEVBQUUsRUFBRTtJQUN0RCxRQUFRO0lBQ1IsTUFBTSxJQUFJLEdBQUcsTUFBTSxJQUFBLGFBQUssRUFBQztRQUN2QixJQUFJLEVBQUUsTUFBTSxDQUFDLElBQUksQ0FBQztRQUNsQixLQUFLLEVBQUU7WUFDTCxJQUFJLEVBQUUsRUFBRSxRQUFRLEVBQUUsTUFBTSxFQUFFO1NBQzNCO0tBQ0YsQ0FBQyxDQUFDO0lBQ0gsTUFBTSxJQUFJLENBQUMsTUFBTSxDQUFDLE9BQU8sQ0FBQztRQUN4QixJQUFJLEVBQUUsV0FBVztRQUNqQixJQUFJO1FBQ0osUUFBUSxFQUFFLE1BQU07UUFDaEIsUUFBUSxFQUFFLE1BQU07S0FDakIsQ0FBQyxDQUFDO0lBQ0gsTUFBTSxPQUFPLEdBQUcsNEJBQTRCLENBQUM7SUFFN0MsT0FBTztJQUNQLE1BQU0sSUFBSSxDQUFDLE1BQU0sQ0FBQyxHQUFHLENBQUMsTUFBTSxDQUFDLElBQUksQ0FBQyxPQUFPLENBQUMsRUFBRSxnQkFBZ0IsQ0FBQyxDQUFDO0lBQzlELE1BQU0sSUFBSSxHQUFHLE1BQU0sSUFBSSxDQUFDLE1BQU0sQ0FBQyxHQUFHLENBQUMsZ0JBQWdCLENBQUMsQ0FBQztJQUVyRCxPQUFPO0lBQ1AsQ0FBQyxDQUFDLEVBQUUsQ0FBQyxJQUFJLENBQUMsUUFBUSxFQUFFLEVBQUUsT0FBTyxDQUFDLENBQUM7SUFFL0IsTUFBTSxJQUFBLGVBQU8s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
